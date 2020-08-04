@@ -6,7 +6,7 @@ ADD . /opt/sms
 
 WORKDIR /opt/sms
 
-ENV PYTHON_VERSION=3.7 \
+ENV PYTHON_VERSION=3.6 \
     PATH=$HOME/.local/bin/:$PATH \
     PYTHONUNBUFFERED=1 \
     PYTHONIOENCODING=UTF-8 \
@@ -23,10 +23,10 @@ ENV NAME=python3 \
 RUN INSTALL_PKGS="python3 python3-devel python3-setuptools python3-pip python3-virtualenv" && \
         yum -y --setopt=tsflags=nodocs install $INSTALL_PKGS && \
         yum -y clean all --enablerepo='*'&& \
-        pip3 install --upgrade pip && \
+        pip3 install "cloudpickle == 0.5.3" && \
         pip3 install "tensorflow" && \
-        pip3 install "cloudpickle" && \
         pip3 install nbconvert nbformat jupyter_client && \
+        pip3 install -r /opt/sms/base-requirements.txt && \
         pip3 install -r /opt/sms/requirements.txt && \
         pip3 install virtualenv && \
         rm /opt/sms/requirements.txt
@@ -37,7 +37,7 @@ RUN chown 185 /opt/sms
 
 EXPOSE 8080
 
-LABEL io.k8s.description="Example model pipeline." \
+LABEL io.k8s.description="model pipeline base image" \
       io.k8s.display-name="simple-model-server" \
       io.openshift.expose-services="8080:http" \
       io.openshift.s2i.scripts-url="image:///opt/sms/.s2i/"

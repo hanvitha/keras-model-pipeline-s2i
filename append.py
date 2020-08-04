@@ -11,10 +11,10 @@ if len(sys.argv) != 3:
 nb = nbformat.read(sys.argv[1], nbformat.NO_CONVERT)
 
 cell = nbformat.v4.new_code_cell(""" 
-import cloudpickle
+from keras.models import load_model
 validator = "validator" in globals() and globals()["validator"] or (lambda x: True)
-with open("model.pickle", "wb") as f:
-    f.write(cloudpickle.dumps((validator, globals()["predictor"])))
+with open("model.h5", "wb") as f:
+    f.write(load_model((validator, globals()["predictor"])))
 
 with open("extra-requirements.txt", "w") as f:
     reqs = "requirements" in globals() and globals()["requirements"] or []

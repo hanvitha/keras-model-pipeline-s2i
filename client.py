@@ -1,9 +1,9 @@
 import base64
 import requests
-from keras.models import load_model
+import cloudpickle
 
 def predict(baseurl, args):
-    payload = {'args': base64.b64encode(load_model(args))}
+    payload = {'args': base64.b64encode(cloudpickle.dumps(args))}
     r = requests.post(baseurl + "/predict", data=payload)
     return r.text
 

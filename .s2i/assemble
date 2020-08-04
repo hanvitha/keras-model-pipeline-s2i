@@ -5,8 +5,8 @@ cd /opt/sms
 echo EXTRA REQUIREMENTS ARE:
 cat /opt/sms/requirements.txt
 
-virtualenv-3 app 
-app/bin/pip install "cloudpickle" "tensorflow" "flask"
+virtualenv app
+app/bin/pip install "tensorflow" "cloudpickle == 0.5.3" "flask"
 
 process_each_first() {
     local IFS=","
@@ -24,7 +24,7 @@ fi
 
 app/bin/pip install ipython prometheus_client uwsgi
 
-source app/bin/activate 
+source app/bin/activate
 
 process_each_second() {
   local IFS=","

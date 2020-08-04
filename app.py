@@ -1,26 +1,26 @@
 from flask import Flask, redirect, request, url_for
 from prometheus_client import make_wsgi_app, Summary, Counter
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
-from pickle import load as pload
-from pickle import loads as ploads
 
 import base64
-from keras.models import load_model
+from pickle import load as pload
+from pickle import loads as ploads
 import sys
 import os
 import pandas as pd
 
 app = Flask(__name__)
 
-METRICS_PREFIX = os.getenv("S2I_APP_METRICS_PREFIX", "model")
+METRICS_PREFIX = os.getenv("S2I_APP_METRICS_PREFIX", "pipeline")
 KERAS_MODEL = os.getenv("KERAS_MODEL")
 PREDICTION_TIME = Summary('%s_processing_seconds' % METRICS_PREFIX, 'Time spent processing predictions')
 PREDICTIONS = Counter('%s_predictions_total' % METRICS_PREFIX, 'Total predictions for a given label', ['value'])
 app.model = None
 
+
 @app.route('/')
 def index():
-  return "Make a prediction by POSTing to /predict"
+    return "Make a prediction by POSTing to /predict"
 
 
 @app.route('/predict', methods=['POST'])
@@ -48,10 +48,12 @@ def predict():
 
 try:
     import json
+    from keras.models import load_model
     from sklearn.pipeline import Pipeline
+
     notebook_count = 0
     pipeline_stages = []
-    if(KERAS_MODEL):
+    if KERAS_MODEL:
         for k, v in json.load(open("stages.json", "r")):
             if notebook_count == 0:
                 pipeline_stages.append((k, pload(open(v, "rb"))))
