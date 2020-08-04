@@ -1,0 +1,47 @@
+cp -R /tmp/src/* /opt/sms/
+
+cd /opt/sms 
+
+echo EXTRA REQUIREMENTS ARE:
+cat /opt/sms/requirements.txt
+
+virtualenv-3 app 
+app/bin/pip install "cloudpickle" "tensorflow" "flask"
+
+process_each_first() {
+    local IFS=","
+    vals=$1
+    for v in $vals; do
+        python3 $(which jupyter) nbconvert --to script ${v}
+    done
+}
+
+process_each_first ${S2I_SOURCE_NOTEBOOK_LIST}
+
+if (( $(wc -l < /opt/sms/requirements.txt) > 0 )); then
+   app/bin/pip install -r /opt/sms/requirements.txt
+fi
+
+app/bin/pip install ipython prometheus_client uwsgi
+
+source app/bin/activate 
+
+process_each_second() {
+  local IFS=","
+  FIRST=true
+  vals=$1
+  for v in $vals; do
+    if [ x${FIRST} = xtrue ]; then
+        FIRST=false
+    else
+        echo "," >> /opt/sms/stages.json
+    fi
+    export S2I_PIPELINE_STAGE_SAVE_FILE=$(basename $v .ipynb).sav
+    app/bin/python ./$(basename ${v} .ipynb).py
+    echo "[\"${v}\", \"${S2I_PIPELINE_STAGE_SAVE_FILE}\"]" >> /opt/sms/stages.json
+  done
+}
+
+echo "[" > /opt/sms/stages.json
+process_each_second ${S2I_SOURCE_NOTEBOOK_LIST}
+echo "]" >> /opt/sms/stages.json
